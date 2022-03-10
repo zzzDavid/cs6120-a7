@@ -3,6 +3,8 @@
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/IR/LegacyPassManager.h"
 #include "llvm/Transforms/IPO/PassManagerBuilder.h"
+#include "llvm/IR/Dominators.h"
+
 using namespace llvm;
 
 namespace {
@@ -12,6 +14,10 @@ namespace {
 
     virtual bool runOnFunction(Function &F) {
       errs() << "I saw a function called " << F.getName() << "!\n";
+      
+      dom_tree = DominatorTree(F);
+      dom_tree.viewGraph();
+
       return false;
     }
   };
