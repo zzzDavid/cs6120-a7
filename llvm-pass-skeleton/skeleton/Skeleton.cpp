@@ -15,26 +15,43 @@ class GVN {
   GVN(Function& F) : domTree(DominatorTree(F)) {
     this->Func = &F;
   }
-  
+
+  void run(); 
   void runOnBlock(BasicBlock& b);
 
  private:
-   Function* Func;
-   DominatorTree domTree;
+  Function* Func;
+  DominatorTree domTree;
+  // env maps symbol name to value number
+  std::map<std::string, unsigned> env;
+  // value numbering table, implemented as a list
+  // [(opcode, [operands])]
+  std::vector<std::pair<unsigned, std::vector<Value*>>> table;
 };
 
-void GVN::runOnBlock(BasicBlock &b) {
-
+void GVN::runOnBlock(BasicBlock &B) {
+  // print all instructions
+  llvm::outs() << B.getName() << "\n";
+  for (auto &I : B) {
+      llvm::outs() << I << "\n";
+  }
+  llvm::outs() << "\n";
 }
 
+void GVN::run() {
+  for (auto &B : *this->Func) {
+    runOnBlock(B);
+  }
+}
 
 struct SkeletonPass : public FunctionPass {
   static char ID;
   SkeletonPass() : FunctionPass(ID) {}
 
   virtual bool runOnFunction(Function &F) {
-    errs() << "I saw a function called " << F.getName() << "!\n";
+    // errs() << "I saw a function called " << F.getName() << "!\n";
     GVN gvn(F);
+    gvn.run();
     return false;
   }
 };
