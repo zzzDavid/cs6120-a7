@@ -15,7 +15,7 @@ namespace {
     virtual bool runOnFunction(Function &F) {
       errs() << "I saw a function called " << F.getName() << "!\n";
       
-      dom_tree = DominatorTree(F);
+      DominatorTree dom_tree(F);
       dom_tree.viewGraph();
 
       return false;
