@@ -8,20 +8,37 @@
 using namespace llvm;
 
 namespace {
-  struct SkeletonPass : public FunctionPass {
-    static char ID;
-    SkeletonPass() : FunctionPass(ID) {}
 
-    virtual bool runOnFunction(Function &F) {
-      errs() << "I saw a function called " << F.getName() << "!\n";
-      
-      DominatorTree dom_tree(F);
-      dom_tree.viewGraph();
+class GVN {
+ public:
+  // Constructor
+  GVN(Function& F) : domTree(DominatorTree(F)) {
+    this->Func = &F;
+  }
+  
+  void runOnBlock(BasicBlock& b);
 
-      return false;
-    }
-  };
+ private:
+   Function* Func;
+   DominatorTree domTree;
+};
+
+void GVN::runOnBlock(BasicBlock &b) {
+
 }
+
+
+struct SkeletonPass : public FunctionPass {
+  static char ID;
+  SkeletonPass() : FunctionPass(ID) {}
+
+  virtual bool runOnFunction(Function &F) {
+    errs() << "I saw a function called " << F.getName() << "!\n";
+    GVN gvn(F);
+    return false;
+  }
+};
+} // namespace
 
 char SkeletonPass::ID = 0;
 
