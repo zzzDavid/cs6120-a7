@@ -59,11 +59,14 @@ void GVN::runOnBlock(BasicBlock &B) {
     std::vector<unsigned> operand_value_nums;
     for (unsigned i = 0; i < I.getNumOperands(); i++) {
       auto operand = I.getOperand(i);
-      auto pos = env.find(operand);
-      if (pos != env.end()) {
-        // if operand in the env
-        unsigned value_num = env[operand];
-        operand_value_nums.push_back(value_num);
+      if (auto loadOp = dyn_cast<LoadInst>(operand)) {
+        auto realOperand = loadOp->getOperand(0);
+        auto pos = env.find(realOperand);
+        if (pos != env.end()) {
+          // if operand in the env
+          unsigned value_num = env[realOperand];
+          operand_value_nums.push_back(value_num);
+        }
       }
     }
     auto value_tuple = std::make_pair(opcode, operand_value_nums);
