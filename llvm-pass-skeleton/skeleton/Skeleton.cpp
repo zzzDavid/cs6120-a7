@@ -1,5 +1,6 @@
 #include "llvm/IR/Dominators.h"
 #include "llvm/IR/Function.h"
+#include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/LegacyPassManager.h"
 #include "llvm/Pass.h"
@@ -18,6 +19,7 @@ public:
   void run();
   void runOnBlock(BasicBlock &b);
   bool isValueEqual(const Value &v1, const Value &v2);
+  void buildCopyInstr(Instruction *I, const Value *src);
 
 private:
   Function *Func;
@@ -27,6 +29,11 @@ private:
   // expression table [(opcode, [operand value number])]
   std::vector<std::pair<unsigned, std::vector<unsigned>>> table;
 };
+
+void GVN ::buildCopyInstr(Instruction *I, const Value *src) {
+  IRBuilder<> builder(I);
+  llvm::outs() << *Func << "\n";
+}
 
 /* isValueEqual: Check if two values are loaded from the same pointer.
  * This is a helper function to check whether two expressions are
@@ -83,6 +90,14 @@ void GVN::runOnBlock(BasicBlock &B) {
       llvm::outs() << "expression: " << I
                    << " has been computed. Pointing it to index: " << index
                    << "\n";
+      // CSE logic
+      Value *src_value = nullptr;
+      for (auto it = env.begin(); it != env.end(); it++) {
+        unsigned idx = it->second;
+        if (idx == index) {
+          buildCopyInstr(&I, it->first);
+        }
+      }
     } else {
       unsigned index = table.size();
       table.push_back(value_tuple);
@@ -99,6 +114,7 @@ void GVN::runOnBlock(BasicBlock &B) {
   // remove all values hashed during this function call
 }
 
+// entry function of GVN
 void GVN::run() { runOnBlock(*domTree.getRoot()); }
 
 struct SkeletonPass : public FunctionPass {
