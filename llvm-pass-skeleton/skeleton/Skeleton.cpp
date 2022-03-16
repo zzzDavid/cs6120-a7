@@ -76,10 +76,14 @@ void GVN::runOnBlock(BasicBlock &B) {
       // add new mapping
       unsigned index = std::distance(table.begin(), it);
       env.insert(std::pair<Value *, unsigned>(&I, index));
+      llvm::outs() << "expression: " << I
+                   << " has been computed. Pointing it to index: " << index;
     } else {
       unsigned index = table.size();
       table.push_back(value_tuple);
       env.insert(std::pair<Value *, unsigned>(&I, index));
+      llvm::outs() << "expression: " << I
+                   << " is new, adding to table, got index: " << index;
     }
   }
 }
