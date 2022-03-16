@@ -91,13 +91,17 @@ void GVN::runOnBlock(BasicBlock &B) {
                    << " is new, adding to table, got index: " << index << "\n";
     }
   }
+  // go to dominator tree child
+  SmallVector<BasicBlock *> children;
+  domTree.getDescendants(&B, children);
+  for (auto *child : children) {
+    runOnBlock(*child);
+  }
+
+  // remove all values hashed during this function call
 }
 
-void GVN::run() {
-  for (auto &B : *this->Func) {
-    runOnBlock(B);
-  }
-}
+void GVN::run() { runOnBlock(*domTree.getRoot()); }
 
 struct SkeletonPass : public FunctionPass {
   static char ID;
