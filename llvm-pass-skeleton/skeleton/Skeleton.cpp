@@ -31,15 +31,24 @@ private:
   // expression table [(opcode, [operand value number])]
   std::vector<std::pair<unsigned, std::vector<unsigned>>> table;
   // instructions to erase
-  SmallVector<Instruction *, 10> InstToRemove;
+  SmallVector<Value *, 10> InstToRemove;
 };
 
 void GVN::printFunc() { llvm::outs() << *Func << "\n"; }
 
 void GVN::removeInsts() {
   std::reverse(InstToRemove.begin(), InstToRemove.end());
-  for (auto *I : InstToRemove) {
-    I->removeFromParent();
+  llvm::outs() << "how many instructions to remove: " << InstToRemove.size()
+               << "\n";
+  for (auto *v : InstToRemove) {
+    if (auto *I = dyn_cast<Instruction>(v)) {
+      llvm::outs() << "try to remove instr: " << *I << "\n";
+      try {
+        I->removeFromParent();
+      } catch (const std::exception &e) {
+        llvm::outs() << e.what();
+      }
+    }
   }
 }
 
@@ -117,7 +126,10 @@ void GVN::runOnBlock(BasicBlock &B) {
         unsigned idx = it->second;
         if (idx == index) {
           buildCopyInstr(&I, it->first);
+          InstToRemove.push_back(I.getOperand(0));
+          InstToRemove.push_back(I.getOperand(1));
           InstToRemove.push_back(&I);
+          break;
         }
       }
     } else {
@@ -139,6 +151,7 @@ void GVN::runOnBlock(BasicBlock &B) {
 // entry function of GVN
 void GVN::run() {
   runOnBlock(*domTree.getRoot());
+  removeInsts();
   printFunc();
 }
 
