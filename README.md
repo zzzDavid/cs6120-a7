@@ -5,7 +5,7 @@ This assignment is about how to develop a compiler pass in LLVM.
 
 ## Use clang to emit LLVM IR
 ```
-$ clang -emit-llvm -S -o - main.c
+$ clang -emit-llvm -S -o - main.cc
 ```
 - `-S`: output LLVM assembly instead of binary
 - `-o - `: output to stdio
