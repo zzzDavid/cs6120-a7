@@ -92,10 +92,8 @@ void GVN::runOnBlock(BasicBlock &B) {
     }
   }
   // go to dominator tree child
-  SmallVector<BasicBlock *> children;
-  domTree.getDescendants(&B, children);
-  for (auto *child : children) {
-    runOnBlock(*child);
+  for (auto *child : domTree.getNode(&B)->children()) {
+    runOnBlock(*(child->getBlock()));
   }
 
   // remove all values hashed during this function call
