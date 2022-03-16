@@ -3,7 +3,8 @@
 This assignment is about how to develop a compiler pass in LLVM. 
 `llvm-pass-skeleton` is a pass prototype that has the boiler-plate code to implement an LLVM pass.
 
-## Use clang to emit LLVM IR
+## How to write an LLVM pass?
+### Use clang to emit LLVM IR
 ```
 $ clang -emit-llvm -S -o - main.cc
 ```
@@ -11,7 +12,7 @@ $ clang -emit-llvm -S -o - main.cc
 - `-o - `: output to stdio
 
 
-## Build the Pass
+### Build the Pass
 ```
 cd llvm-pass-skeleton
 mkdir build && cd build
@@ -19,9 +20,16 @@ cmake ..
 make
 ```
 
-## Run the Pass
+### Run the Pass
 Compile the program with clang, and during compilation, run the pass
 ```
 clang -Xclang -load -Xclang ./llvm-pass-skeleton/build/skeleton/libSkeletonPass.so main.cc
 ```
 There will be an `a.out` executable in the current directory. 
+
+## LLVM Pass: Global Value Numbering (GVN)
+I implemented a Common Sub-expression Elimination (CSE) pass using GVN.
+
+## Testing
+I developed my own test suite, and use LLVM's [lit](https://llvm.org/docs/CommandGuide/lit.html) as the testing tool.
+

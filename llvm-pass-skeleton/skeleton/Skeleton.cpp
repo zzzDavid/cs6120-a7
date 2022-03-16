@@ -22,8 +22,8 @@ public:
 private:
   Function *Func;
   DominatorTree domTree;
-  // env maps symbol name to value number
-  std::map<std::string, unsigned> env;
+  // env maps value to value number
+  std::map<Value *, unsigned> env;
   // value numbering table, implemented as a list
   // [(opcode, [operands])]
   std::vector<std::pair<unsigned, std::vector<Value *>>> table;
