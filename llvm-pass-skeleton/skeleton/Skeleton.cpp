@@ -106,7 +106,6 @@ struct SkeletonPass : public FunctionPass {
   SkeletonPass() : FunctionPass(ID) {}
 
   virtual bool runOnFunction(Function &F) {
-    // errs() << "I saw a function called " << F.getName() << "!\n";
     GVN gvn(F);
     gvn.run();
     return false;
