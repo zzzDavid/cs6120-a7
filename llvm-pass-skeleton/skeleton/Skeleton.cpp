@@ -19,7 +19,9 @@ public:
   void run();
   void runOnBlock(BasicBlock &b);
   bool isValueEqual(const Value &v1, const Value &v2);
-  void buildCopyInstr(Instruction *I, const Value *src);
+  void buildCopyInstr(Instruction *I, Value *src);
+  void removeInsts();
+  void printFunc();
 
 private:
   Function *Func;
@@ -28,11 +30,30 @@ private:
   std::map<Value *, unsigned> env;
   // expression table [(opcode, [operand value number])]
   std::vector<std::pair<unsigned, std::vector<unsigned>>> table;
+  // instructions to erase
+  SmallVector<Instruction *, 10> InstToRemove;
 };
 
-void GVN ::buildCopyInstr(Instruction *I, const Value *src) {
-  IRBuilder<> builder(I);
-  llvm::outs() << *Func << "\n";
+void GVN::printFunc() { llvm::outs() << *Func << "\n"; }
+
+void GVN::removeInsts() {
+  std::reverse(InstToRemove.begin(), InstToRemove.end());
+  for (auto *I : InstToRemove) {
+    I->removeFromParent();
+  }
+}
+
+void GVN ::buildCopyInstr(Instruction *I, Value *src) {
+  // Find the immediate storeInstruction that stores the
+  // value of instruction I to a pointer. We then build
+  // change the store op's operand to src.
+  for (auto &U : I->uses()) {
+    User *user = U.getUser();
+    if (auto ii = dyn_cast<StoreInst>(user)) {
+      user->setOperand(U.getOperandNo(), src);
+      break;
+    }
+  }
 }
 
 /* isValueEqual: Check if two values are loaded from the same pointer.
@@ -96,6 +117,7 @@ void GVN::runOnBlock(BasicBlock &B) {
         unsigned idx = it->second;
         if (idx == index) {
           buildCopyInstr(&I, it->first);
+          InstToRemove.push_back(&I);
         }
       }
     } else {
@@ -115,7 +137,10 @@ void GVN::runOnBlock(BasicBlock &B) {
 }
 
 // entry function of GVN
-void GVN::run() { runOnBlock(*domTree.getRoot()); }
+void GVN::run() {
+  runOnBlock(*domTree.getRoot());
+  printFunc();
+}
 
 struct SkeletonPass : public FunctionPass {
   static char ID;
