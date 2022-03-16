@@ -51,11 +51,13 @@ bool GVN::isValueEqual(const Value &v1, const Value &v2) {
 void GVN::runOnBlock(BasicBlock &B) {
   for (auto &I : B) {
     unsigned opcode = I.getOpcode();
-    if (opcode == 33 or opcode == 32) {
+    if (opcode == 33 or opcode == 32 or opcode == 1 or opcode == 2) {
       // skip store instruction since it's not an assignment
       // skip load instruction because it's handled in other instructions
+      // skip br and ret
       continue;
     }
+    llvm::outs() << "opcode: " << opcode << ", ";
     // get value number for each operand
     std::vector<unsigned> operand_value_nums;
     for (unsigned i = 0; i < I.getNumOperands(); i++) {
