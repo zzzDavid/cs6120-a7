@@ -51,8 +51,9 @@ bool GVN::isValueEqual(const Value &v1, const Value &v2) {
 void GVN::runOnBlock(BasicBlock &B) {
   for (auto &I : B) {
     unsigned opcode = I.getOpcode();
-    if (opcode == 33) {
+    if (opcode == 33 or opcode == 32) {
       // skip store instruction since it's not an assignment
+      // skip load instruction because it's handled in other instructions
       continue;
     }
     // get value number for each operand
@@ -71,19 +72,21 @@ void GVN::runOnBlock(BasicBlock &B) {
     }
     auto value_tuple = std::make_pair(opcode, operand_value_nums);
     auto it = std::find(table.begin(), table.end(), value_tuple);
-    bool computed = it != table.end();
+    // alloca is always a new assignment
+    bool computed = it != table.end() && opcode != 31;
     if (computed) {
       // add new mapping
       unsigned index = std::distance(table.begin(), it);
       env.insert(std::pair<Value *, unsigned>(&I, index));
       llvm::outs() << "expression: " << I
-                   << " has been computed. Pointing it to index: " << index;
+                   << " has been computed. Pointing it to index: " << index
+                   << "\n";
     } else {
       unsigned index = table.size();
       table.push_back(value_tuple);
       env.insert(std::pair<Value *, unsigned>(&I, index));
       llvm::outs() << "expression: " << I
-                   << " is new, adding to table, got index: " << index;
+                   << " is new, adding to table, got index: " << index << "\n";
     }
   }
 }
