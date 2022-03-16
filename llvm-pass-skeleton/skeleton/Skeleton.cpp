@@ -43,12 +43,10 @@ bool GVN::isValueEqual(const Value &v1, const Value &v2) {
   bool equal = false;
   if (auto *loadOp1 = dyn_cast<LoadInst>(&v1)) {
     if (auto *loadOp2 = dyn_cast<LoadInst>(&v2)) {
-      llvm::outs() << loadOp1->getOperand(0) << "\n";
-      llvm::outs() << loadOp2->getOperand(0) << "\n";
-      llvm::outs() << (loadOp1->getOperand(0) == loadOp2->getOperand(0))
-                   << "\n";
+      equal = loadOp1->getOperand(0) == loadOp2->getOperand(0);
     }
   }
+  return equal;
 }
 
 void GVN::runOnBlock(BasicBlock &B) {
@@ -56,16 +54,16 @@ void GVN::runOnBlock(BasicBlock &B) {
   llvm::outs() << B.getName() << "\n";
   std::vector<Value *> op1;
   for (auto &I : B) {
-    llvm::outs() << I.getOpcodeName() << "\n";
-    llvm::outs() << I << "\n";
-    llvm::outs() << I.getOpcode() << "\n";
-    if (I.getOpcode() == (unsigned)13) {
+    // llvm::outs() << I.getOpcodeName() << "\n";
+    // llvm::outs() << I << "\n";
+    // llvm::outs() << I.getOpcode() << "\n";
+    if (I.getOpcode() == (unsigned)13) { // 13 is add
       op1.push_back(I.getOperand(0));
     }
   }
-  llvm::outs() << op1.size() << "\n";
+  // llvm::outs() << op1.size() << "\n";
   llvm::outs() << "isValueEqual: " << isValueEqual(*op1[0], *op1[1]) << "\n";
-  llvm::outs() << "\n";
+  // llvm::outs() << "\n";
 }
 
 void GVN::run() {
