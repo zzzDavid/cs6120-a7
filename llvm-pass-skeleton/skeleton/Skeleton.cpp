@@ -1,5 +1,6 @@
 #include "llvm/IR/Dominators.h"
 #include "llvm/IR/Function.h"
+#include "llvm/IR/Instructions.h"
 #include "llvm/IR/LegacyPassManager.h"
 #include "llvm/Pass.h"
 #include "llvm/Support/raw_ostream.h"
@@ -38,7 +39,17 @@ private:
  * and %1, %4 are loaded from the same pointer
  * Then these two add exprs are equivalent
  */
-void GVN::isValueEqual(const Value &v1, const Value &v2) {}
+bool GVN::isValueEqual(const Value &v1, const Value &v2) {
+  bool equal = false;
+  if (auto *loadOp1 = dyn_cast<LoadInst>(&v1)) {
+    if (auto *loadOp2 = dyn_cast<LoadInst>(&v2)) {
+      llvm::outs() << loadOp1->getOperand(0) << "\n";
+      llvm::outs() << loadOp2->getOperand(0) << "\n";
+      llvm::outs() << (loadOp1->getOperand(0) == loadOp2->getOperand(0))
+                   << "\n";
+    }
+  }
+}
 
 void GVN::runOnBlock(BasicBlock &B) {
   // print all instructions
@@ -53,7 +64,7 @@ void GVN::runOnBlock(BasicBlock &B) {
     }
   }
   llvm::outs() << op1.size() << "\n";
-  llvm::outs() << (op1[0] == op1[1]) << "\n";
+  llvm::outs() << "isValueEqual: " << isValueEqual(*op1[0], *op1[1]) << "\n";
   llvm::outs() << "\n";
 }
 
