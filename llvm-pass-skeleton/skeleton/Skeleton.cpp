@@ -24,9 +24,8 @@ private:
   DominatorTree domTree;
   // env maps value to value number
   std::map<Value *, unsigned> env;
-  // value numbering table, implemented as a list
-  // [(opcode, [operands])]
-  std::vector<std::pair<unsigned, std::vector<Value *>>> table;
+  // expression table [(opcode, [operand value number])]
+  std::vector<std::pair<unsigned, std::vector<unsigned>>> table;
 };
 
 /* isValueEqual: Check if two values are loaded from the same pointer.
@@ -50,20 +49,36 @@ bool GVN::isValueEqual(const Value &v1, const Value &v2) {
 }
 
 void GVN::runOnBlock(BasicBlock &B) {
-  // print all instructions
-  llvm::outs() << B.getName() << "\n";
-  std::vector<Value *> op1;
   for (auto &I : B) {
-    // llvm::outs() << I.getOpcodeName() << "\n";
-    // llvm::outs() << I << "\n";
-    // llvm::outs() << I.getOpcode() << "\n";
-    if (I.getOpcode() == (unsigned)13) { // 13 is add
-      op1.push_back(I.getOperand(0));
+    unsigned opcode = I.getOpcode();
+    if (opcode == 33) {
+      // skip store instruction since it's not an assignment
+      continue;
+    }
+    // get value number for each operand
+    std::vector<unsigned> operand_value_nums;
+    for (unsigned i = 0; i < I.getNumOperands(); i++) {
+      auto operand = I.getOperand(i);
+      auto pos = env.find(operand);
+      if (pos != env.end()) {
+        // if operand in the env
+        unsigned value_num = env[operand];
+        operand_value_nums.push_back(value_num);
+      }
+    }
+    auto value_tuple = std::make_pair(opcode, operand_value_nums);
+    auto it = std::find(table.begin(), table.end(), value_tuple);
+    bool computed = it != table.end();
+    if (computed) {
+      // add new mapping
+      unsigned index = std::distance(table.begin(), it);
+      env.insert(std::pair<Value *, unsigned>(&I, index));
+    } else {
+      unsigned index = table.size();
+      table.push_back(value_tuple);
+      env.insert(std::pair<Value *, unsigned>(&I, index));
     }
   }
-  // llvm::outs() << op1.size() << "\n";
-  llvm::outs() << "isValueEqual: " << isValueEqual(*op1[0], *op1[1]) << "\n";
-  // llvm::outs() << "\n";
 }
 
 void GVN::run() {
