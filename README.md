@@ -21,9 +21,9 @@ make
 ```
 
 ### Run the Pass
-Compile the program with clang, and during compilation, run the pass
+Compile the program with clang and run the pass
 ```
-clang -Xclang -load -Xclang ./llvm-pass-skeleton/build/skeleton/libSkeletonPass.so main.cc
+clang -Xclang -load -Xclang ./llvm-pass-skeleton/build/skeleton/libSkeletonPass.so your_file.cc
 ```
 There will be an `a.out` executable in the current directory. 
 
@@ -31,5 +31,8 @@ There will be an `a.out` executable in the current directory.
 I implemented a Common Sub-expression Elimination (CSE) pass using GVN.
 
 ## Testing
-I developed my own test suite, and use LLVM's [lit](https://llvm.org/docs/CommandGuide/lit.html) as the testing tool.
+I developed my own test suite, and use LLVM's [lit](https://llvm.org/docs/CommandGuide/lit.html) and [FileCheck](https://llvm.org/docs/CommandGuide/FileCheck.html) as testing tools. To run the test suite:
+```sh
+lit tests
+```
 

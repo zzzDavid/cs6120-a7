@@ -38,11 +38,11 @@ void GVN::printFunc() { llvm::outs() << *Func << "\n"; }
 
 void GVN::removeInsts() {
   std::reverse(InstToRemove.begin(), InstToRemove.end());
-  llvm::outs() << "how many instructions to remove: " << InstToRemove.size()
-               << "\n";
+  // llvm::outs() << "how many instructions to remove: " << InstToRemove.size()
+  //              << "\n";
   for (auto *v : InstToRemove) {
     if (auto *I = dyn_cast<Instruction>(v)) {
-      llvm::outs() << "try to remove instr: " << *I << "\n";
+      // llvm::outs() << "try to remove instr: " << *I << "\n";
       try {
         I->removeFromParent();
       } catch (const std::exception &e) {
@@ -117,9 +117,9 @@ void GVN::runOnBlock(BasicBlock &B) {
       // add new mapping
       unsigned index = std::distance(table.begin(), it);
       env.insert(std::pair<Value *, unsigned>(&I, index));
-      llvm::outs() << "expression: " << I
-                   << " has been computed. Pointing it to index: " << index
-                   << "\n";
+      // llvm::outs() << "expression: " << I
+      //              << " has been computed. Pointing it to index: " << index
+      //              << "\n";
       // CSE logic
       Value *src_value = nullptr;
       for (auto it = env.begin(); it != env.end(); it++) {
@@ -136,8 +136,9 @@ void GVN::runOnBlock(BasicBlock &B) {
       unsigned index = table.size();
       table.push_back(value_tuple);
       env.insert(std::pair<Value *, unsigned>(&I, index));
-      llvm::outs() << "expression: " << I
-                   << " is new, adding to table, got index: " << index << "\n";
+      // llvm::outs() << "expression: " << I
+      //              << " is new, adding to table, got index: " << index <<
+      //              "\n";
     }
   }
   // go to dominator tree child
